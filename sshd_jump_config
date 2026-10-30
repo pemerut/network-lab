@@ -1,0 +1,28 @@
+# Network configuration
+Port 2222
+ListenAddress 127.0.0.1
+AddressFamily inet
+
+# Server identity
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+# Allowed users
+AllowUsers pemerut
+PermitRootLogin no
+
+# Authentication
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+AuthenticationMethods publickey
+UsePAM yes
+
+# SSH forwarding permissions
+AllowTcpForwarding local
+PermitOpen 127.0.0.1:2223
+AllowAgentForwarding no
+X11Forwarding no
+
+# Additional settings
+MaxAuthTries 3
+LogLevel VERBOSE

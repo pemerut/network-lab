@@ -1,20 +1,38 @@
-After stopping the server on 8080 and attemting to connect:
-debug1: client_input_channel_open: ctype forwarded-tcpip rchan 1 win 2097152 max 32768
-debug1: client_request_forwarded_tcpip: listen 127.0.0.1 port 19080, originator 127.0.0.1 port 54284
-debug1: connect_next: start for host 127.0.0.1 ([127.0.0.1]:8080)
-debug1: connect_next: connect host 127.0.0.1 ([127.0.0.1]:8080) in progress, fd=4
-debug1: channel 0: new forwarded-tcpip [127.0.0.1] (inactive timeout: 0)
-debug1: confirm forwarded-tcpip
-debug1: channel 0: connection failed: Connection refused
-connect_to 127.0.0.1 port 8080: failed.
-debug1: channel 0: free: 127.0.0.1, nchannels 1
+With running Python server
+sudo ss -lntp | grep ':19080'      
+LISTEN 0      128        127.0.0.1:19080      0.0.0.0:*    users:(("sshd",pid=30776,fd=7))
 
-After the fix:
-debug1: client_input_channel_open: ctype forwarded-tcpip rchan 1 win 2097152 max 32768
-debug1: client_request_forwarded_tcpip: listen 127.0.0.1 port 19080, originator 127.0.0.1 port 53594
-debug1: connect_next: start for host 127.0.0.1 ([127.0.0.1]:8080)
-debug1: connect_next: connect host 127.0.0.1 ([127.0.0.1]:8080) in progress, fd=4
-debug1: channel 0: new forwarded-tcpip [127.0.0.1] (inactive timeout: 0)
-debug1: confirm forwarded-tcpip
-debug1: channel 0: connected to 127.0.0.1 port 8080
-debug1: channel 0: free: 127.0.0.1, nchannels 1
+curl -v http://127.0.0.1:19080/
+*   Trying 127.0.0.1:19080...
+* Connected to 127.0.0.1 (127.0.0.1) port 19080
+> GET / HTTP/1.1
+> Host: 127.0.0.1:19080
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+* HTTP 1.0, assume close after body
+< HTTP/1.0 200 OK
+< Server: SimpleHTTP/0.6 Python/3.12.3
+< Date: Fri, 30 Oct 2026 16:17:57 GMT
+< Content-type: text/html
+< Content-Length: 29
+< Last-Modified: Wed, 21 Oct 2026 16:40:05 GMT
+< 
+Hello from my networking lab
+* Closing connection
+
+With stoped server
+sudo ss -lntp | grep ':19080'
+LISTEN 0      128        127.0.0.1:19080      0.0.0.0:*    users:(("sshd",pid=30776,fd=7))
+
+curl -v http://127.0.0.1:19080/
+*   Trying 127.0.0.1:19080...
+* Connected to 127.0.0.1 (127.0.0.1) port 19080
+> GET / HTTP/1.1
+> Host: 127.0.0.1:19080
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+* Recv failure: Connection reset by peer
+* Closing connection
+curl: (56) Recv failure: Connection reset by peer

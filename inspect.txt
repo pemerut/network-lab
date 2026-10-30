@@ -1,22 +1,25 @@
-sudo systemctl start nginx
+Without python server running:
 
-curl -i http://127.0.0.1:8080/
-HTTP/1.0 200 OK
-Server: SimpleHTTP/0.6 Python/3.12.3
-Date: Fri, 30 Oct 2026 20:21:27 GMT
-Content-type: text/html
-Content-Length: 29
-Last-Modified: Wed, 21 Oct 2026 16:40:05 GMT
-
-Hello from my networking lab
-
-curl -i http://127.0.0.1:8081/
-HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
-Date: Fri, 30 Oct 2026 20:21:43 GMT
-Content-Type: text/html
-Content-Length: 29
-Connection: keep-alive
-Last-Modified: Wed, 21 Oct 2026 16:40:05 GMT
-
-Hello from my networking lab
+curl -v http://127.0.0.1:8081/
+*   Trying 127.0.0.1:8081...
+* Connected to 127.0.0.1 (127.0.0.1) port 8081
+> GET / HTTP/1.1
+> Host: 127.0.0.1:8081
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 502 Bad Gateway
+< Server: nginx/1.24.0 (Ubuntu)
+< Date: Fri, 30 Oct 2026 20:24:23 GMT
+< Content-Type: text/html
+< Content-Length: 166
+< Connection: keep-alive
+< 
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
+* Connection #0 to host 127.0.0.1 left intact

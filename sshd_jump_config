@@ -18,8 +18,10 @@ AuthenticationMethods publickey
 UsePAM yes
 
 # SSH forwarding permissions
-AllowTcpForwarding local
+AllowTcpForwarding yes
 PermitOpen 127.0.0.1:2223
+PermitListen 127.0.0.1:19080
+GatewayPorts no
 AllowAgentForwarding no
 X11Forwarding no
 

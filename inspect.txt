@@ -1,16 +1,8 @@
-sudo ss -lntp | grep -E ':2222|:2223'
-LISTEN 0      128        127.0.0.1:2223       0.0.0.0:*    users:(("sshd",pid=19655,fd=3))   
-LISTEN 0      128        127.0.0.1:2222       0.0.0.0:*    users:(("sshd",pid=19535,fd=3))  
-
-ssh -G lab-target | grep -E \
-'^(hostname|port|user|proxyjump|identityfile) '
-user pemerut
-hostname 127.0.0.1
-port 2223
-identityfile ~/.ssh/id_ed25519_lab
-proxyjump lab-jump
-
-ssh lab-target 'hostname; whoami; echo "$SSH_CONNECTION"'
-pc
-pemerut
-127.0.0.1 40682 127.0.0.1 2223
+sudo /usr/sbin/sshd -t   -f "$HOME/network-lab/sshd_jump_config"
+sudo /usr/sbin/sshd -T \
+  -f "$HOME/network-lab/sshd_jump_config" \
+  | grep -E '^(allowtcpforwarding|permitopen|permitlisten|gatewayports) '
+gatewayports no
+allowtcpforwarding yes
+permitopen 127.0.0.1:2223
+permitlisten 127.0.0.1:19080

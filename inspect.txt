@@ -1,13 +1,4 @@
-sudo ss -lntp | grep -E ':2222|:2223' > inspect.txt
-LISTEN 0      128        127.0.0.1:2223       0.0.0.0:*    users:(("sshd",pid=19655,fd=3))          
-LISTEN 0      128        127.0.0.1:2222       0.0.0.0:*    users:(("sshd",pid=19535,fd=3))          
-
-sudo /usr/sbin/sshd -D -e \
-  -f "$HOME/network-lab/sshd_jump_config"
-Server listening on 127.0.0.1 port 2222.
-
-sudo /usr/sbin/sshd -D -e \
-  -f "$HOME/network-lab/sshd_target_config"
-[sudo] password for pemerut:             
-Server listening on 127.0.0.1 port 2223.
-'/home/pemerut/network-lab/inspect.txt'
+ssh lab-target 'hostname; whoami; echo "$SSH_CONNECTION"'
+pc
+pemerut
+127.0.0.1 40682 127.0.0.1 2223

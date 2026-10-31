@@ -1,22 +1,37 @@
-ps -eo pid,ppid,cmd | grep '[n]ginx'
-   1591       1 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
-   1592    1591 nginx: worker process
-   1593    1591 nginx: worker process
-   1594    1591 nginx: worker process
-   1595    1591 nginx: worker process
-   1596    1591 nginx: worker process
-   1597    1591 nginx: worker process
-   1598    1591 nginx: worker process
-   1600    1591 nginx: worker process
-   1601    1591 nginx: worker process
-   1602    1591 nginx: worker process
-   1603    1591 nginx: worker process
-   1604    1591 nginx: worker process
-   1605    1591 nginx: worker process
-   1606    1591 nginx: worker process
-   1607    1591 nginx: worker process
-   1608    1591 nginx: worker process
-   1609    1591 nginx: worker process
-   1610    1591 nginx: worker process
-   1612    1591 nginx: worker process
-   1613    1591 nginx: worker process
+server {
+    listen 127.0.0.1:8081;
+    server_name localhost;
+
+    access_log /var/log/nginx/network-lab.access.log;
+    error_log /var/log/nginx/network-lab.error.log;
+
+    add_header X-Lab-Proxy nginx always;
+
+    # NGINX handles this endpoint directly
+    location = / {
+        default_type text/plain;
+        return 200 "NGINX is running\n";
+    }
+
+    # Do not expose the application's metrics endpoint
+    # through this demo API route
+    location = /api/metrics {
+        return 404;
+    }
+
+    # Forward API requests to Go
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080/;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Reject other paths
+    location / {
+        return 404;
+    }
+}

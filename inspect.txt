@@ -1,3 +1,12 @@
+log_format lab_upstream
+    'time=$time_iso8601 '
+    'request="$request" '
+    'status=$status '
+    'upstream="$upstream_addr" '
+    'upstream_status="$upstream_status" '
+    'upstream_time="$upstream_response_time" '
+    'request_time="$request_time"';
+
 upstream go_backend {
     zone go_backend 64k;
 
@@ -8,17 +17,86 @@ upstream go_backend {
            max_fails=1 fail_timeout=10s;
 }
 
+server {
+    listen 127.0.0.1:8081;
+    server_name localhost;
+
+    access_log /var/log/nginx/network-lab.access.log lab_upstream;
+    error_log /var/log/nginx/network-lab.error.log;
+
+    add_header X-Lab-Proxy nginx always;
+    add_header X-Upstream $upstream_addr always;
+
+    # NGINX handles this endpoint directly
+    location = / {
+        default_type text/plain;
+        return 200 "NGINX is running\n";
+    }
+
+    # Do not expose the application's metrics endpoint
+    # through this demo API route
+    location = /api/metrics {
+        return 404;
+    }
+
+    # Forward API requests to Go
+    location /api/ {
+        proxy_pass http://go_backend/;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 2s;
+        proxy_read_timeout 10s;
+
+        proxy_next_upstream error timeout;
+        proxy_next_upstream_tries 2;
+    }
+
+    # Reject other paths
+    location / {
+        return 404;
+    }
+}
+
 sudo nginx -t && sudo systemctl reload nginx
-[sudo] password for pemerut:             
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-for i in $(seq 1 40); do
-    curl -s -D - -o /dev/null \
-      http://127.0.0.1:8081/api/health \
-      | grep -i '^X-Upstream:'
-done | sort | uniq -c
-     30 X-Upstream: 127.0.0.1:8080
-     10 X-Upstream: 127.0.0.1:8082
+curl -i http://127.0.0.1:8081/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 21:25:42 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 18
+Connection: keep-alive
+X-Lab-Proxy: nginx
+X-Upstream: 127.0.0.1:8080
 
-     
+Server is healthy
+
+127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
+time=2026-10-31T22:25:42+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="0.000" request_time="0.000"
+
+for i in $(seq 1 8); do
+    curl -s -o /dev/null \
+      http://127.0.0.1:8081/api/health
+done
+
+sudo tail -n 12 /var/log/nginx/network-lab.access.log
+127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
+127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
+127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
+time=2026-10-31T22:25:42+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="0.000" request_time="0.000"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8080, 127.0.0.1:8082" upstream_status="502, 200" upstream_time="0.000, 0.000" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.000"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.000"
+

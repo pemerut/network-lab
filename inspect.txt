@@ -1,10 +1,61 @@
-sudo nginx -t
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
+curl -i http://127.0.0.1:8081/
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 14:59:37 GMT
+Content-Type: text/plain
+Content-Length: 17
+Connection: keep-alive
+X-Lab-Proxy: nginx
 
-sudo systemctl start nginx
-sudo ss -lntp | grep nginx
-LISTEN 0      511        127.0.0.1:8081       0.0.0.0:*    users:(("nginx",pid=13204,fd=7),("nginx",pid=13203,fd=7),("nginx",pid=13202,fd=7),("nginx",pid=13201,fd=7),("nginx",pid=13200,fd=7),("nginx",pid=13199,fd=7),("nginx",pid=13198,fd=7),("nginx",pid=13197,fd=7),("nginx",pid=13196,fd=7),("nginx",pid=13195,fd=7),("nginx",pid=13193,fd=7),("nginx",pid=13192,fd=7),("nginx",pid=13191,fd=7),("nginx",pid=13190,fd=7),("nginx",pid=13189,fd=7),("nginx",pid=13188,fd=7),("nginx",pid=13187,fd=7),("nginx",pid=13186,fd=7),("nginx",pid=13185,fd=7),("nginx",pid=13184,fd=7),("nginx",pid=13183,fd=7))
+NGINX is running
 
-# You can reload the server bacase the master manages the transition to new worker processess
-sudo systemctl reload nginx
+curl -i http://127.0.0.1:8081/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 15:00:49 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 18
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+Server is healthy
+
+curl -i http://localhost:8081/api/users
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 15:01:59 GMT
+Content-Type: application/json
+Content-Length: 84
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+[{"id":1,"username":"alice"},{"id":2,"username":"bob"},{"id":42,"username":"Niko"}]
+
+curl -i http://localhost:8081/api/does-not-exist
+HTTP/1.1 404 Not Found
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 15:03:18 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 19
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+X-Lab-Proxy: nginx
+
+404 page not found
+
+curl -i http://127.0.0.1:8081/does-not-exist
+HTTP/1.1 404 Not Found
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 15:04:00 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>

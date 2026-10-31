@@ -1,18 +1,54 @@
-sudo nginx -t
+curl -w '\nTotal: %{time_total}s\n' \
+  http://127.0.0.1:8080/slow
+slow response finished
+
+Total: 3.002927s
+
+sudo nginx -t && sudo systemctl reload nginx
+[sudo] password for pemerut:             
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-sudo tail -n 12 /var/log/nginx/network-lab.access.log
-127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:21:07:04 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
-time=2026-10-31T22:25:42+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="0.000" request_time="0.000"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8080, 127.0.0.1:8082" upstream_status="502, 200" upstream_time="0.000, 0.000" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.000"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.000"
+for i in $(seq 1 8); do
+    curl -s -o /dev/null \
+      -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" \
+      http://127.0.0.1:8081/api/slow &
+done
 
+wait
+[1] 35880
+[2] 35881
+[3] 35882
+[4] 35883
+[5] 35884
+[6] 35885
+[7] 35886
+[8] 35887
+Request 3: HTTP 200, total 3.003273s
+Request 7: HTTP 200, total 3.002655s
+Request 2: HTTP 200, total 3.003304s
+Request 1: HTTP 200, total 3.003411s
+Request 5: HTTP 200, total 3.003269s
+Request 4: HTTP 200, total 3.003627s
+Request 8: HTTP 200, total 3.003139s
+Request 6: HTTP 200, total 3.003092s
+[1]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
+[2]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
+[3]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
+[6]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
+[7]-  Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
+
+
+sudo tail -n 12 /var/log/nginx/network-lab.access.log
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
+time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.000"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="3.002" request_time="3.003"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.002" request_time="3.002"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.002" request_time="3.003"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.003" request_time="3.003"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.004" request_time="3.003"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.002" request_time="3.003"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.003" request_time="3.003"
+time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="3.002" request_time="3.003"

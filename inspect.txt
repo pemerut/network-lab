@@ -1,79 +1,25 @@
-#When the end of proxy_pass ends with /
-sudo nginx -t
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
+PORT=8080 go run .
 
-curl -i http://localhost:8081/
+PORT=8082 go run .
+
+curl -i http://localhost:8080/health
 HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:43:59 GMT
-Content-Type: text/plain
-Content-Length: 17
-Connection: keep-alive
-X-Lab-Proxy: nginx
-
-NGINX is running
-
-curl -i http://localhost:8081/api/health
-HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:44:23 GMT
-Content-Type: text/plain; charset=utf-8
+Date: Sat, 31 Oct 2026 17:18:12 GMT
 Content-Length: 18
-Connection: keep-alive
-X-Lab-Proxy: nginx
+Content-Type: text/plain; charset=utf-8
 
 Server is healthy
 
-curl -i http://localhost:8081/api/users
+curl -i http://localhost:8082/health
 HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:44:47 GMT
-Content-Type: application/json
-Content-Length: 84
-Connection: keep-alive
-X-Lab-Proxy: nginx
-
-[{"id":1,"username":"alice"},{"id":2,"username":"bob"},{"id":42,"username":"Niko"}]
-
-
-#When the end of proxy_pass ip doesnt end with /
-sudo nginx -t && sudo systemctl reload nginx
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
-
-
-curl -i http://localhost:8081/
-HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:48:42 GMT
-Content-Type: text/plain
-Content-Length: 17
-Connection: keep-alive
-X-Lab-Proxy: nginx
-
-NGINX is running
-
-curl -i http://localhost:8081/api/health
-HTTP/1.1 404 Not Found
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:49:00 GMT
+Date: Sat, 31 Oct 2026 17:18:24 GMT
+Content-Length: 18
 Content-Type: text/plain; charset=utf-8
-Content-Length: 19
-Connection: keep-alive
-X-Content-Type-Options: nosniff
-X-Lab-Proxy: nginx
 
-404 page not found
+Server is healthy
 
-curl -i http://localhost:8081/api/users
-HTTP/1.1 404 Not Found
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:49:13 GMT
-Content-Type: text/plain; charset=utf-8
-Content-Length: 19
-Connection: keep-alive
-X-Content-Type-Options: nosniff
-X-Lab-Proxy: nginx
+sudo ss -lntp | grep -E ":8080|:8082"
+LISTEN 0      4096       127.0.0.1:8080       0.0.0.0:*    users:(("mod",pid=20702,fd=3))
+LISTEN 0      4096       127.0.0.1:8082       0.0.0.0:*    users:(("mod",pid=20979,fd=3))  
 
-404 page not found
+

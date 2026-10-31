@@ -1,63 +1,22 @@
-sudo nginx -t
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
-pemerut@pc:~/network-lab$ 
-
-sudo ss -lntp | grep nginx
-LISTEN 0      511        127.0.0.1:8081       0.0.0.0:*    users:(("nginx",pid=44944,fd=7),("nginx",pid=44943,fd=7),("nginx",pid=44942,fd=7),("nginx",pid=44941,fd=7),("nginx",pid=44940,fd=7),("nginx",pid=44939,fd=7),("nginx",pid=44938,fd=7),("nginx",pid=44937,fd=7),("nginx",pid=44936,fd=7),("nginx",pid=44935,fd=7),("nginx",pid=44934,fd=7),("nginx",pid=44933,fd=7),("nginx",pid=44931,fd=7),("nginx",pid=44930,fd=7),("nginx",pid=44929,fd=7),("nginx",pid=44928,fd=7),("nginx",pid=44927,fd=7),("nginx",pid=44926,fd=7),("nginx",pid=44925,fd=7),("nginx",pid=44924,fd=7),("nginx",pid=44923,fd=7))
-
-curl -v localhost:8081
-* Host localhost:8081 was resolved.
-* IPv6: ::1
-* IPv4: 127.0.0.1
-*   Trying [::1]:8081...
-* connect to ::1 port 8081 from ::1 port 35586 failed: Connection refused
-*   Trying 127.0.0.1:8081...
-* Connected to localhost (127.0.0.1) port 8081
-> GET / HTTP/1.1
-> Host: localhost:8081
-> User-Agent: curl/8.5.0
-> Accept: */*
-> 
-< HTTP/1.1 200 OK
-< Server: nginx/1.24.0 (Ubuntu)
-< Date: Fri, 30 Oct 2026 22:18:54 GMT
-< Content-Type: text/html
-< Content-Length: 29
-< Connection: keep-alive
-< Last-Modified: Wed, 21 Oct 2026 16:40:05 GMT
-< 
-Hello from my networking lab
-* Connection #0 to host localhost left intact
-
-curl -v localhost:8081
-* Host localhost:8081 was resolved.
-* IPv6: ::1
-* IPv4: 127.0.0.1
-*   Trying [::1]:8081...
-* connect to ::1 port 8081 from ::1 port 39964 failed: Connection refused
-*   Trying 127.0.0.1:8081...
-* Connected to localhost (127.0.0.1) port 8081
-> GET / HTTP/1.1
-> Host: localhost:8081
-> User-Agent: curl/8.5.0
-> Accept: */*
-> 
-< HTTP/1.1 502 Bad Gateway
-< Server: nginx/1.24.0 (Ubuntu)
-< Date: Fri, 30 Oct 2026 22:19:30 GMT
-< Content-Type: text/html
-< Content-Length: 166
-< Connection: keep-alive
-< 
-<html>
-<head><title>502 Bad Gateway</title></head>
-<body>
-<center><h1>502 Bad Gateway</h1></center>
-<hr><center>nginx/1.24.0 (Ubuntu)</center>
-</body>
-</html>
-* Connection #0 to host localhost left intact
-
-tail /var/log/nginx/network-lab.error.log
-2026/10/30 23:19:30 [error] 44924#44924: *9 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "localhost:8081"
+ps -eo pid,ppid,cmd | grep '[n]ginx'
+   1591       1 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+   1592    1591 nginx: worker process
+   1593    1591 nginx: worker process
+   1594    1591 nginx: worker process
+   1595    1591 nginx: worker process
+   1596    1591 nginx: worker process
+   1597    1591 nginx: worker process
+   1598    1591 nginx: worker process
+   1600    1591 nginx: worker process
+   1601    1591 nginx: worker process
+   1602    1591 nginx: worker process
+   1603    1591 nginx: worker process
+   1604    1591 nginx: worker process
+   1605    1591 nginx: worker process
+   1606    1591 nginx: worker process
+   1607    1591 nginx: worker process
+   1608    1591 nginx: worker process
+   1609    1591 nginx: worker process
+   1610    1591 nginx: worker process
+   1612    1591 nginx: worker process
+   1613    1591 nginx: worker process

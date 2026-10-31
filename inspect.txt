@@ -1,77 +1,24 @@
-With all the servers running
-ss -lntp | grep -E '8080|8082'
-LISTEN 0      4096       127.0.0.1:8080       0.0.0.0:*    users:(("mod",pid=24046,fd=3))  
-LISTEN 0      4096       127.0.0.1:8082       0.0.0.0:*    users:(("mod",pid=24109,fd=3))  
+upstream go_backend {
+    zone go_backend 64k;
 
-sudo nginx -t
+    server 127.0.0.1:8080 weight=3
+           max_fails=1 fail_timeout=10s;
+
+    server 127.0.0.1:8082 weight=1
+           max_fails=1 fail_timeout=10s;
+}
+
+sudo nginx -t && sudo systemctl reload nginx
+[sudo] password for pemerut:             
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-for i in $(seq 1 12); do
+for i in $(seq 1 40); do
     curl -s -D - -o /dev/null \
       http://127.0.0.1:8081/api/health \
-      | grep -Ei '^(HTTP/|X-Upstream:)'
-done
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080
+      | grep -i '^X-Upstream:'
+done | sort | uniq -c
+     30 X-Upstream: 127.0.0.1:8080
+     10 X-Upstream: 127.0.0.1:8082
 
-
-With one server running
-ss -lntp | grep -E '8080|8082'
-LISTEN 0      4096       127.0.0.1:8082       0.0.0.0:*    users:(("mod",pid=24109,fd=3))  
-
-sudo nginx -t
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
-
-for i in $(seq 1 12); do
-    curl -s -D - -o /dev/null \
-      http://127.0.0.1:8081/api/health \
-      | grep -Ei '^(HTTP/|X-Upstream:)'
-done
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080, 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8080, 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
+     

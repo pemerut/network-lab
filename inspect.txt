@@ -1,12 +1,63 @@
-sudo nginx -t && sudo systemctl reload nginx
-
+#When the end of proxy_pass ends with /
+sudo nginx -t
 nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-curl -i http://127.0.0.1:8081/api/health
+curl -i http://localhost:8081/
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 16:43:59 GMT
+Content-Type: text/plain
+Content-Length: 17
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+NGINX is running
+
+curl -i http://localhost:8081/api/health
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 16:44:23 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 18
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+Server is healthy
+
+curl -i http://localhost:8081/api/users
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 16:44:47 GMT
+Content-Type: application/json
+Content-Length: 84
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+[{"id":1,"username":"alice"},{"id":2,"username":"bob"},{"id":42,"username":"Niko"}]
+
+
+#When the end of proxy_pass ip doesnt end with /
+sudo nginx -t && sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+
+curl -i http://localhost:8081/
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 16:48:42 GMT
+Content-Type: text/plain
+Content-Length: 17
+Connection: keep-alive
+X-Lab-Proxy: nginx
+
+NGINX is running
+
+curl -i http://localhost:8081/api/health
 HTTP/1.1 404 Not Found
 Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:39:40 GMT
+Date: Sat, 31 Oct 2026 16:49:00 GMT
 Content-Type: text/plain; charset=utf-8
 Content-Length: 19
 Connection: keep-alive
@@ -15,26 +66,14 @@ X-Lab-Proxy: nginx
 
 404 page not found
 
-curl -i http://127.0.0.1:8081/api/health
-HTTP/1.1 200 OK
+curl -i http://localhost:8081/api/users
+HTTP/1.1 404 Not Found
 Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 16:40:28 GMT
+Date: Sat, 31 Oct 2026 16:49:13 GMT
 Content-Type: text/plain; charset=utf-8
-Content-Length: 18
+Content-Length: 19
 Connection: keep-alive
+X-Content-Type-Options: nosniff
 X-Lab-Proxy: nginx
 
-Server is healthy
-
-sudo tail -f /var/log/nginx/network-lab.access.log\
-> 
-127.0.0.1 - - [30/Oct/2026:23:18:22 +0100] "GET / HTTP/1.1" 200 29 "-" "curl/8.5.0"
-127.0.0.1 - - [30/Oct/2026:23:18:54 +0100] "GET / HTTP/1.1" 200 29 "-" "curl/8.5.0"
-127.0.0.1 - - [30/Oct/2026:23:19:30 +0100] "GET / HTTP/1.1" 502 166 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:15:59:37 +0100] "GET / HTTP/1.1" 200 17 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:16:00:49 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:16:01:59 +0100] "GET /api/users HTTP/1.1" 200 84 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:16:03:18 +0100] "GET /api/does-not-exist HTTP/1.1" 404 19 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:16:04:00 +0100] "GET /does-not-exist HTTP/1.1" 404 162 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:17:39:40 +0100] "GET /api/health HTTP/1.1" 404 19 "-" "curl/8.5.0"
-127.0.0.1 - - [31/Oct/2026:17:40:28 +0100] "GET /api/health HTTP/1.1" 200 18 "-" "curl/8.5.0"
+404 page not found

@@ -1,37 +1,10 @@
-server {
-    listen 127.0.0.1:8081;
-    server_name localhost;
+sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
 
-    access_log /var/log/nginx/network-lab.access.log;
-    error_log /var/log/nginx/network-lab.error.log;
+sudo systemctl start nginx
+sudo ss -lntp | grep nginx
+LISTEN 0      511        127.0.0.1:8081       0.0.0.0:*    users:(("nginx",pid=13204,fd=7),("nginx",pid=13203,fd=7),("nginx",pid=13202,fd=7),("nginx",pid=13201,fd=7),("nginx",pid=13200,fd=7),("nginx",pid=13199,fd=7),("nginx",pid=13198,fd=7),("nginx",pid=13197,fd=7),("nginx",pid=13196,fd=7),("nginx",pid=13195,fd=7),("nginx",pid=13193,fd=7),("nginx",pid=13192,fd=7),("nginx",pid=13191,fd=7),("nginx",pid=13190,fd=7),("nginx",pid=13189,fd=7),("nginx",pid=13188,fd=7),("nginx",pid=13187,fd=7),("nginx",pid=13186,fd=7),("nginx",pid=13185,fd=7),("nginx",pid=13184,fd=7),("nginx",pid=13183,fd=7))
 
-    add_header X-Lab-Proxy nginx always;
-
-    # NGINX handles this endpoint directly
-    location = / {
-        default_type text/plain;
-        return 200 "NGINX is running\n";
-    }
-
-    # Do not expose the application's metrics endpoint
-    # through this demo API route
-    location = /api/metrics {
-        return 404;
-    }
-
-    # Forward API requests to Go
-    location /api/ {
-        proxy_pass http://127.0.0.1:8080/;
-        proxy_http_version 1.1;
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # Reject other paths
-    location / {
-        return 404;
-    }
-}
+# You can reload the server bacase the master manages the transition to new worker processess
+sudo systemctl reload nginx

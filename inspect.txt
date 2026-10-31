@@ -1,5 +1,62 @@
-# With one of the servers stoped
-for i in $(seq 1 12); do     curl -s -D - -o /dev/null       http://127.0.0.1:8081/api/health       | grep -Ei '^(HTTP/|X-Upstream:)'; done
+With all the servers running
+ss -lntp | grep -E '8080|8082'
+LISTEN 0      4096       127.0.0.1:8080       0.0.0.0:*    users:(("mod",pid=24046,fd=3))  
+LISTEN 0      4096       127.0.0.1:8082       0.0.0.0:*    users:(("mod",pid=24109,fd=3))  
+
+sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+for i in $(seq 1 12); do
+    curl -s -D - -o /dev/null \
+      http://127.0.0.1:8081/api/health \
+      | grep -Ei '^(HTTP/|X-Upstream:)'
+done
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080
+
+
+With one server running
+ss -lntp | grep -E '8080|8082'
+LISTEN 0      4096       127.0.0.1:8082       0.0.0.0:*    users:(("mod",pid=24109,fd=3))  
+
+sudo nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+for i in $(seq 1 12); do
+    curl -s -D - -o /dev/null \
+      http://127.0.0.1:8081/api/health \
+      | grep -Ei '^(HTTP/|X-Upstream:)'
+done
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8080, 127.0.0.1:8082
+HTTP/1.1 200 OK
+X-Upstream: 127.0.0.1:8082
 HTTP/1.1 200 OK
 X-Upstream: 127.0.0.1:8082
 HTTP/1.1 200 OK
@@ -18,28 +75,3 @@ HTTP/1.1 200 OK
 X-Upstream: 127.0.0.1:8082
 HTTP/1.1 200 OK
 X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-HTTP/1.1 200 OK
-X-Upstream: 127.0.0.1:8082
-
-# With all servers stoped 
-curl -i http://127.0.0.1:8081/api/health
-HTTP/1.1 502 Bad Gateway
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 17:44:55 GMT
-Content-Type: text/html
-Content-Length: 166
-Connection: keep-alive
-X-Lab-Proxy: nginx
-X-Upstream: 127.0.0.1:8082, 127.0.0.1:8080
-
-<html>
-<head><title>502 Bad Gateway</title></head>
-<body>
-<center><h1>502 Bad Gateway</h1></center>
-<hr><center>nginx/1.24.0 (Ubuntu)</center>
-</body>
-</html>

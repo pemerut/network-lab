@@ -1,54 +1,33 @@
-curl -w '\nTotal: %{time_total}s\n' \
-  http://127.0.0.1:8080/slow
-slow response finished
+curl -i \
+  -w '\nTotal: %{time_total}s\n' \
+  http://127.0.0.1:8081/api/slow
+HTTP/1.1 504 Gateway Time-out
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sat, 31 Oct 2026 22:06:57 GMT
+Content-Type: text/html
+Content-Length: 176
+Connection: keep-alive
+X-Lab-Proxy: nginx
+X-Upstream: 127.0.0.1:8080
 
-Total: 3.002927s
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
 
-sudo nginx -t && sudo systemctl reload nginx
-[sudo] password for pemerut:             
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
+Total: 1.001667s
 
-for i in $(seq 1 8); do
-    curl -s -o /dev/null \
-      -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" \
-      http://127.0.0.1:8081/api/slow &
-done
+sudo tail -n 10 /var/log/nginx/network-lab.error.log
+2026/10/30 21:24:23 [error] 44927#44927: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "127.0.0.1:8081"
+2026/10/30 23:19:30 [error] 44924#44924: *9 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "localhost:8081"
+2026/10/31 18:43:55 [error] 22649#22649: *77 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
+2026/10/31 18:44:55 [error] 22650#22650: *100 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8082/health", host: "127.0.0.1:8081"
+2026/10/31 18:44:55 [error] 22650#22650: *100 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
+2026/10/31 18:55:19 [error] 22650#22650: *129 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
+2026/10/31 18:55:19 [error] 22652#22652: *136 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
+2026/10/31 22:27:35 [error] 32923#32923: *235 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
+2026/10/31 23:06:57 [error] 37752#37752: *268 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 127.0.0.1, server: localhost, request: "GET /api/slow HTTP/1.1", upstream: "http://127.0.0.1:8080/slow", host: "127.0.0.1:8081"
 
-wait
-[1] 35880
-[2] 35881
-[3] 35882
-[4] 35883
-[5] 35884
-[6] 35885
-[7] 35886
-[8] 35887
-Request 3: HTTP 200, total 3.003273s
-Request 7: HTTP 200, total 3.002655s
-Request 2: HTTP 200, total 3.003304s
-Request 1: HTTP 200, total 3.003411s
-Request 5: HTTP 200, total 3.003269s
-Request 4: HTTP 200, total 3.003627s
-Request 8: HTTP 200, total 3.003139s
-Request 6: HTTP 200, total 3.003092s
-[1]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
-[2]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
-[3]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
-[6]   Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
-[7]-  Done                    curl -s -o /dev/null -w "Request $i: HTTP %{http_code}, total %{time_total}s\n" http://127.0.0.1:8081/api/slow
-
-
-sudo tail -n 12 /var/log/nginx/network-lab.access.log
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.001" request_time="0.001"
-time=2026-10-31T22:27:35+01:00 request="GET /api/health HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="0.000" request_time="0.000"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="3.002" request_time="3.003"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.002" request_time="3.002"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.002" request_time="3.003"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.003" request_time="3.003"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.004" request_time="3.003"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.002" request_time="3.003"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8080" upstream_status="200" upstream_time="3.003" request_time="3.003"
-time=2026-10-31T22:59:21+01:00 request="GET /api/slow HTTP/1.1" status=200 upstream="127.0.0.1:8082" upstream_status="200" upstream_time="3.002" request_time="3.003"

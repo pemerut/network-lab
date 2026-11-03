@@ -1,33 +1,13 @@
-curl -i \
-  -w '\nTotal: %{time_total}s\n' \
-  http://127.0.0.1:8081/api/slow
-HTTP/1.1 504 Gateway Time-out
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sat, 31 Oct 2026 22:06:57 GMT
-Content-Type: text/html
-Content-Length: 176
-Connection: keep-alive
-X-Lab-Proxy: nginx
-X-Upstream: 127.0.0.1:8080
+sudo install -d -m 0700 /etc/nginx/lab-tls
 
-<html>
-<head><title>504 Gateway Time-out</title></head>
-<body>
-<center><h1>504 Gateway Time-out</h1></center>
-<hr><center>nginx/1.24.0 (Ubuntu)</center>
-</body>
-</html>
+sudo openssl req -x509 \
+  -newkey rsa:2048 \
+  -nodes \
+  -days 30 \
+  -keyout /etc/nginx/lab-tls/key.pem \
+  -out /etc/nginx/lab-tls/cert.pem \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 
-Total: 1.001667s
-
-sudo tail -n 10 /var/log/nginx/network-lab.error.log
-2026/10/30 21:24:23 [error] 44927#44927: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "127.0.0.1:8081"
-2026/10/30 23:19:30 [error] 44924#44924: *9 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "localhost:8081"
-2026/10/31 18:43:55 [error] 22649#22649: *77 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
-2026/10/31 18:44:55 [error] 22650#22650: *100 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8082/health", host: "127.0.0.1:8081"
-2026/10/31 18:44:55 [error] 22650#22650: *100 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
-2026/10/31 18:55:19 [error] 22650#22650: *129 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
-2026/10/31 18:55:19 [error] 22652#22652: *136 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
-2026/10/31 22:27:35 [error] 32923#32923: *235 connect() failed (111: Connection refused) while connecting to upstream, client: 127.0.0.1, server: localhost, request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/health", host: "127.0.0.1:8081"
-2026/10/31 23:06:57 [error] 37752#37752: *268 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 127.0.0.1, server: localhost, request: "GET /api/slow HTTP/1.1", upstream: "http://127.0.0.1:8080/slow", host: "127.0.0.1:8081"
-
+  sudo chmod 600 /etc/nginx/lab-tls/key.pem
+sudo chmod 644 /etc/nginx/lab-tls/cert.pem

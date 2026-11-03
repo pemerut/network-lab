@@ -1,13 +1,28 @@
-sudo install -d -m 0700 /etc/nginx/lab-tls
+server {
+    listen 127.0.0.1:8081;
+    listen 127.0.0.1:8443 ssl;
 
-sudo openssl req -x509 \
-  -newkey rsa:2048 \
-  -nodes \
-  -days 30 \
-  -keyout /etc/nginx/lab-tls/key.pem \
-  -out /etc/nginx/lab-tls/cert.pem \
-  -subj "/CN=localhost" \
-  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+    server_name localhost;
 
-  sudo chmod 600 /etc/nginx/lab-tls/key.pem
-sudo chmod 644 /etc/nginx/lab-tls/cert.pem
+    ssl_certificate /etc/nginx/lab-tls/cert.pem;
+    ssl_certificate_key /etc/nginx/lab-tls/key.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    access_log /var/log/nginx/network-lab.access.log lab_upstream;
+    error_log /var/log/nginx/network-lab.error.log;
+
+    add_header X-Lab-Proxy nginx always;
+    add_header X-Upstream $upstream_addr always;
+
+    # NGINX handles this endpoint directly
+    location = / {
+        default_type text/plain;
+        return 200 "NGINX is running\n";
+    }
+
+    # Do not expose the application's metrics endpoint
+    # through this demo API route
+    location = /api/metrics {
+        return 404;
+      ...
+    }

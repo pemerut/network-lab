@@ -1,104 +1,18 @@
-sudo nginx -t
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
+command -v ufw
+command -v nft
+/usr/sbin/ufw
+/usr/sbin/nft
 
+sudo ufw status verbose
+[sudo] password for pemerut:             
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
 
-sudo ss -lntp | grep -E "8081|8443"
-LISTEN 0      511        127.0.0.1:8081       0.0.0.0:*    users:(("nginx",pid=39917,fd=7),("nginx",pid=39916,fd=7),("nginx",pid=39915,fd=7),("nginx",pid=39914,fd=7),("nginx",pid=39913,fd=7),("nginx",pid=39912,fd=7),("nginx",pid=39911,fd=7),("nginx",pid=39909,fd=7),("nginx",pid=39908,fd=7),("nginx",pid=39907,fd=7),("nginx",pid=39906,fd=7),("nginx",pid=39905,fd=7),("nginx",pid=39904,fd=7),("nginx",pid=39903,fd=7),("nginx",pid=39902,fd=7),("nginx",pid=39901,fd=7),("nginx",pid=39900,fd=7),("nginx",pid=39899,fd=7),("nginx",pid=39898,fd=7),("nginx",pid=39897,fd=7),("nginx",pid=1609,fd=7))                     
-LISTEN 0      511        127.0.0.1:8443       0.0.0.0:*    users:(("nginx",pid=39917,fd=52),("nginx",pid=39916,fd=52),("nginx",pid=39915,fd=52),("nginx",pid=39914,fd=52),("nginx",pid=39913,fd=52),("nginx",pid=39912,fd=52),("nginx",pid=39911,fd=52),("nginx",pid=39909,fd=52),("nginx",pid=39908,fd=52),("nginx",pid=39907,fd=52),("nginx",pid=39906,fd=52),("nginx",pid=39905,fd=52),("nginx",pid=39904,fd=52),("nginx",pid=39903,fd=52),("nginx",pid=39902,fd=52),("nginx",pid=39901,fd=52),("nginx",pid=39900,fd=52),("nginx",pid=39899,fd=52),("nginx",pid=39898,fd=52),("nginx",pid=39897,fd=52),("nginx",pid=1609,fd=52))
+sudo nft list ruleset
+# Warning: table ip filter is managed by iptables-nft, do not touch!
 
-
-curl -v https://localhost:8443
-* Host localhost:8443 was resolved.
-* IPv6: ::1
-* IPv4: 127.0.0.1
-*   Trying [::1]:8443...
-* connect to ::1 port 8443 from ::1 port 57348 failed: Connection refused
-*   Trying 127.0.0.1:8443...
-* Connected to localhost (127.0.0.1) port 8443
-* ALPN: curl offers h2,http/1.1
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-*  CAfile: /etc/ssl/certs/ca-certificates.crt
-*  CApath: /etc/ssl/certs
-* TLSv1.3 (IN), TLS handshake, Server hello (2):
-* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
-* TLSv1.3 (IN), TLS handshake, Certificate (11):
-* TLSv1.3 (OUT), TLS alert, unknown CA (560):
-* SSL certificate problem: self-signed certificate
-* Closing connection
-curl: (60) SSL certificate problem: self-signed certificate
-More details here: https://curl.se/docs/sslcerts.html
-
-curl failed to verify the legitimacy of the server and therefore could not
-establish a secure connection to it. To learn more about this situation and
-how to fix it, please visit the web page mentioned above.
-
-
-curl -v --cacert /etc/nginx/lab-tls/cert.pem https://localhost:8443
-* Host localhost:8443 was resolved.
-* IPv6: ::1
-* IPv4: 127.0.0.1
-*   Trying [::1]:8443...
-* connect to ::1 port 8443 from ::1 port 33790 failed: Connection refused
-*   Trying 127.0.0.1:8443...
-* Connected to localhost (127.0.0.1) port 8443
-* ALPN: curl offers h2,http/1.1
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-* error setting certificate file: /etc/nginx/lab-tls/cert.pem
-* error setting certificate file: /etc/nginx/lab-tls/cert.pem
-* Closing connection
-* error setting certificate file: /etc/nginx/lab-tls/cert.pem
-* error setting certificate file: /etc/nginx/lab-tls/cert.pem
-curl: (77) error setting certificate file: /etc/nginx/lab-tls/cert.pem
-
-
-sudo curl -v --cacert /etc/nginx/lab-tls/cert.pem https://localhost:8443
-* Host localhost:8443 was resolved.
-* IPv6: ::1
-* IPv4: 127.0.0.1
-*   Trying [::1]:8443...
-* connect to ::1 port 8443 from ::1 port 49416 failed: Connection refused
-*   Trying 127.0.0.1:8443...
-* Connected to localhost (127.0.0.1) port 8443
-* ALPN: curl offers h2,http/1.1
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-*  CAfile: /etc/nginx/lab-tls/cert.pem
-*  CApath: /etc/ssl/certs
-* TLSv1.3 (IN), TLS handshake, Server hello (2):
-* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
-* TLSv1.3 (IN), TLS handshake, Certificate (11):
-* TLSv1.3 (IN), TLS handshake, CERT verify (15):
-* TLSv1.3 (IN), TLS handshake, Finished (20):
-* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
-* TLSv1.3 (OUT), TLS handshake, Finished (20):
-* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
-* ALPN: server accepted http/1.1
-* Server certificate:
-*  subject: CN=localhost
-*  start date: Nov  3 20:23:06 2026 GMT
-*  expire date: Dec  3 20:23:06 2026 GMT
-*  subjectAltName: host "localhost" matched cert's "localhost"
-*  issuer: CN=localhost
-*  SSL certificate verify ok.
-*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
-* using HTTP/1.x
-> GET / HTTP/1.1
-> Host: localhost:8443
-> User-Agent: curl/8.5.0
-> Accept: */*
-> 
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* old SSL session ID is stale, removing
-< HTTP/1.1 200 OK
-< Server: nginx/1.24.0 (Ubuntu)
-< Date: Tue, 03 Nov 2026 20:51:30 GMT
-< Content-Type: text/plain
-< Content-Length: 17
-< Connection: keep-alive
-< X-Lab-Proxy: nginx
-< 
-NGINX is running
-* Connection #0 to host localhost left intact
-
-
+sudo ufw allow 443/tcp
+Rule added
+Rule added (v6)
